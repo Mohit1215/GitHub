@@ -164,17 +164,26 @@ fflush(stdout);
   if(count==0)//****************if there are no further moves possible .....send to parent****************************
   {
     printf("PID %d: Dead end after move #%d\n",getpid(),count1);
+    fflush(stdout);
     #ifdef DISPLAY_BOARD
     for(int m=0;m<max1;m++){
+      printf("PID %d:   ",getpid());
       for(int n=0;n<max2;n++){
         if(b[m][n]==1)
         {
-          printf("PID: %d k ",getpid());
+          printf("k");
+
+        }
+        else{
+          printf(".");
+
         }
     }
     //printf("PID temp %d:",getpid());
     printf("\n");
+    fflush(stdout);
   }
+  fflush(stdout);
     #endif
 
 
@@ -192,17 +201,26 @@ pid_t pid;
 int p1[2];
 pipe(p1);
       printf("PID %d: %d moves possible after move #%d\n",getpid(),count,count1);
+      fflush(stdout);
       #ifdef DISPLAY_BOARD
       for(int m=0;m<max1;m++){
+        printf("PID %d:   ",getpid());
         for(int n=0;n<max2;n++){
           if(b[m][n]==1)
           {
-            printf("PID: %d k ",getpid());
+            printf("k");
+
+          }
+          else{
+            printf(".");
+
           }
       }
       //printf("PID temp %d:",getpid());
       printf("\n");
+      fflush(stdout);
     }
+    fflush(stdout);
       #endif
           //printf("Forked2");
 
@@ -212,7 +230,7 @@ pipe(p1);
           {
             //printf("Forked1");
 
-            b[m][n]=1;
+            //b[m][n]=1;
             fflush(stdout);
             pid=fork();
 
@@ -220,7 +238,7 @@ pipe(p1);
 
             if(pid==0)//**************child process********************
             {
-
+              b[m][n]=1;
 
               //printf("CHILD1: %d",getpid());
               //printf("p[0]: %d, p[1]: %d\n",p[0],p[1]);
@@ -241,11 +259,13 @@ pipe(p1);
               //printf("PID %d: Sent %d on pipe to parent",getpid(),sq);
               exit(1);
             }
+            #ifdef NO_PARALLEL
+            wait(NULL);
+            #endif
           }
         }
       }
             if(pid>0){//***************Parent process**********************
-            //no_parallel to be added here
 
               //printf("PID %d: Waiting for all children to terminate\n",getpid());
               int child_values[20]={0};
@@ -262,10 +282,11 @@ pipe(p1);
                 //memcpy(&num1,num,sizeof(int));
                 child_values[l]=num;
                 printf("PID %d: Received %d from child\n",getpid(),num);
+                fflush(stdout);
                 l++;
                 temp_count--;
               }
-              for(int h=0;h<20;h++)
+              for(int h=0;h<19;h++)
               {
 
                 if(child_values[h]>child_values[h+1])
@@ -279,10 +300,12 @@ pipe(p1);
               {
                 int pro=max1*max2;
                 printf("PID %d: Best solution found visits %d squares (out of %d)\n",getpid(),child_values[19],pro);
+                fflush(stdout);
               }
               else{
               write(p[1],&child_values[19],sizeof(child_values[19]));
               printf("PID %d: All child processes terminated; sent %d on pipe to parent\n",getpid(),child_values[19]);
+              fflush(stdout);
               //return child_values[19];
               //exit(1);
             }
