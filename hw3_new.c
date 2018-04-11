@@ -30,7 +30,6 @@ void *move(void *);
 void *move(void *arg)
 {
   struct parameters *p=(struct parameters *)arg;
-  //free(arg);
   int max1=p->max1;
   int max2=p->max2;
   int row=p->m;
@@ -38,23 +37,10 @@ void *move(void *arg)
   int count=0;
   int count1=0;
   pthread_t tid[1000];
-  //pthread_t parent_tid;
 
   int ar[max1][max2];//********This array is just to maintain moves everytime************
 
   p->b[row][column]=1;//** first move**
-
-  /*printf("THREAD %u: the value of max1 : %d max2 %d m%d n:%d\n",(unsigned int)pthread_self(),p->max1,p->max2,p->m,p->n);
-  for(int m=0;m<(p->max1);m++){
-    for(int n=0;n<(p->max2);n++){
-      //p->b[m][n]=0;
-    printf("%d",p->b[m][n]);
-    }
-    printf("\n");
-  }*/
-
-  //printf("The value of number of threads is:%d\n",num_threads );
-//printf("The value of dead ends is:%d\n",dead_ends );
 
   for(int m=0;m<max1;m++){//**This array maintains if there are possible moves and therefore assign 0 everytime**
     for(int n=0;n<max2;n++){
@@ -66,15 +52,11 @@ void *move(void *arg)
     for(int m=0;m<(p->max1);m++){
       for(int n=0;n<(p->max2);n++){
         p->b[m][n]=0;
-      //printf("%d",p->b[m][n]);
       }
-      //printf("\n");
     }
   }
 
   p->b[0][0]=1;//** first move**
-
-  //printf("The value of the thread ID is:%u\n",(unsigned int)tid[num_threads] );
 
   //check how many moves are possible
   if((row+2)<max1)
@@ -83,7 +65,6 @@ void *move(void *arg)
     {
       if(p->b[row+2][column+1]==0)
       {
-        //ar[row][column]=move((row+2),(column+1),max1,max2)+1;
         ar[row+2][column+1]=2;
         count++;
       }
@@ -92,7 +73,6 @@ void *move(void *arg)
     {
       if(p->b[row+2][column-1]==0)
       {
-        //ar[row][column]=move((row+2),(column-1),max1,max2)+1;
         ar[row+2][column-1]=2;
         count++;
       }
@@ -100,12 +80,10 @@ void *move(void *arg)
   }
   if((row-2)>=0)
   {
-
     if((column+1)<max2&&(row-2)>=0)
     {
       if(p->b[row-2][column+1]==0)
       {
-        //ar[row][column]=move((row-2),(column+1),max1,max2)+1;
         ar[row-2][column+1]=2;
         count++;
       }
@@ -114,7 +92,6 @@ void *move(void *arg)
     {
       if(p->b[row-2][column-1]==0)
       {
-        //ar[row][column]=move((row-2),(column-1),max1,max2)+1;
         ar[row-2][column-1]=2;
         count++;
       }
@@ -127,29 +104,25 @@ void *move(void *arg)
     {
       if(p->b[row-1][column+2]==0)
       {
-      //  ar[row][column]=move((row-1),(column+2),max1,max2)+1;
-      ar[row-1][column+2]=2;
-      count++;
+        ar[row-1][column+2]=2;
+        count++;
       }
     }
     if((row+1)<max1&&(column+2)<max2)
     {
       if(p->b[row+1][column+2]==0)
       {
-      //  ar[row][column]=move((row+1),(column+2),max1,max2)+1;
-      ar[row+1][column+2]=2;
-      count++;
+        ar[row+1][column+2]=2;
+        count++;
       }
     }
   }
   if((column-2)>=0)
   {
-
     if((row-1)>=0&&(column-2)>=0)
     {
       if(p->b[row-1][column-2]==0)
       {
-        //ar[row][column]=move((row-1),(column-2),max1,max2)+1;
         ar[row-1][column-2]=2;
         count++;
       }
@@ -158,13 +131,12 @@ void *move(void *arg)
     {
       if(p->b[row+1][column-2]==0)
       {
-        //ar[row][column]=move((row+1),(column-2),max1,max2)+1;
         ar[row+1][column-2]=2;
         count++;
       }
     }
   }
-  for(int m=0;m<max1;m++)
+  for(int m=0;m<max1;m++)//** To count the number of move**
   {
     for(int n=0;n<max2;n++)
     {
@@ -174,34 +146,13 @@ void *move(void *arg)
 
 fflush(stdout);
 
-if(count==0)//****************if there are no further moves possible .....send to parent****************************
+if(count==0)//****************if there are no further moves possible****************************
 {
   printf("THREAD %u: Dead end after move #%d\n",(unsigned int)pthread_self(),count1);
   fflush(stdout);
-  #ifdef DISPLAY_BOARD
-  for(int m=0;m<max1;m++){
-    printf("PID %d:   ",getpid());
-    for(int n=0;n<max2;n++){
-      if(p->b[m][n]==1)
-      {
-        printf("k");
-
-      }
-      else{
-        printf(".");
-
-      }
-  }
-  //printf("PID temp %d:",getpid());
-  printf("\n");
-  fflush(stdout);
-}
-fflush(stdout);
-  #endif
-
-
+  
   pthread_mutex_lock(&mutex);//**  prevent synchronization error **
-  if(count1>max_squares)//** updating the max_squares if the squares covered are greater thn the maximum
+  if(count1>max_squares)//** updating the max_squares if the squares covered are greater thn the maximum**
   {
     max_squares=count1;
   }
@@ -213,28 +164,15 @@ fflush(stdout);
       dead_end_boards[dead_ends][i][j]=p->b[i][j];//**updating the global array**
     }
   }
-  dead_ends++;
+  dead_ends++;//** to know the count of dead end boards**
   pthread_mutex_unlock(&mutex);
-/*
-  if(pthread_equal(parent_tid,pthread_self()))
-  {
-    int pro=max1*max2;
-    printf("THREAD %u: Best solution found visits %d squares (out of %d)\n",(unsigned int)pthread_self(),max_squares,pro);
-    fflush(stdout);
-
-    unsigned int *y=malloc(sizeof(unsigned int));
-    *y=pthread_self();
-    pthread_exit(y);
-  }*/
-
+  
   unsigned int *y=malloc(sizeof(unsigned int));
   *y=pthread_self();
   pthread_exit(y);
-  free(y);  //exit(1);
+  free(y); 
 }
-
-
-else if(count==1) //** continu with the same thread**
+else if(count==1) //** continue with the same thread**
 {
   for(int m=0;m<max1;m++)
   {
@@ -243,82 +181,23 @@ else if(count==1) //** continu with the same thread**
       if(ar[m][n]==2)
       {
         p->b[m][n]=1;
-
-        //struct parameters *p2; ** Dynamically allocating and updating the structure to be sent further
-        //p2=malloc(sizeof(struct parameters)*100);
-
         p->m=m;
         p->n=n;
 
         move(p);
-        //p->max1=max1;
-        //p2->max2=max2;
-
-      //  p2->b=(int**)malloc(sizeof (int *) * max1);//**********Dynamically allocating memory to the array for storing moves*************
-      //  p2->b[0]=(int *)malloc(sizeof (int ) * max2*max1);
-
-        /*for(int i=0;i<max1;i++){
-          p2->b[i]=(p2->b[0]+max2*i);
-        }
-
-         for(int i=0;i<max1;i++)
-         {
-           for(int j=0;j<max2;j++)
-           {
-             p2->b[i][j]=p->b[i][j];*updating the array to be sent to the child thread**
-           }
-         }
-         int rc=pthread_create(&tid[num_threads],NULL,move,p);
-         if(rc!=0)
-         {
-           fprintf( stderr, "Could not create thread (%d)\n",rc);
-           //return EXIT_FAILURE;
-         }
-         unsigned int *x;
-         int rc1=pthread_join(tid[num_threads],(void**)&x);
-         free(x);
-         //num_threads++;*/
       }
     }
   }
 }
-
-
-else// ** Defining the different threads if there are more than one moves possible.**
+else// ** Defining the different threads if there are more than one moves possible, and create threads**
 {
     printf("THREAD %u: %d moves possible after move #%d; creating threads\n",(unsigned int)pthread_self(),count,count1);
     fflush(stdout);
-    #ifdef DISPLAY_BOARD
-    for(int m=0;m<max1;m++){
-      if(m==0)
-      {
-        printf("THREAD %u: > ",(unsigned int)pthread_self());
-
-      }
-      else{
-      printf("THREAD %u:   ",(unsigned int)pthread_self());
-      }
-      for(int n=0;n<max2;n++){
-        if(p->b[m][n]==1)
-        {
-          printf("k");
-        }
-        else{
-          printf(".");
-        }
-      }
-      printf("\n");
-      fflush(stdout);
-    }
-    fflush(stdout);
-    #endif
-    //int count_threads=num_threads;
-    for(int m=0;m<max1;m++){
+    
+  for(int m=0;m<max1;m++){
       for(int n=0;n<max2;n++){//  check and send the new potential coordinates
         if(ar[m][n]==2)
         {
-          //p->b[m][n]=1;
-
           struct parameters *p2; //** Dynamically allocating and updating the structure to be sent further
           p2=malloc(sizeof(struct parameters)*1);
 
@@ -357,38 +236,11 @@ else// ** Defining the different threads if there are more than one moves possib
            }
            free(x);
            free(p2);
-
-
          }
        }
-
      }
-     /*for(int f=num_threads-count;f<num_threads;f++)
-      {
-         unsigned int *x;
-         int rc1=pthread_join(tid[num_threads],(void**)&x);
-         free(x);
-         num_threads++;
-      }*/
-
 }
-
-
-  // move(p2);
-  /*for(int h=num_threads;h>0;h--)** wait for all child threads to terminate **
-  {
-    unsigned int *x=NULL;
-    int rc=pthread_join(tid[h],(void**)&x);
-    if(rc!=0)
-    {
-      fprintf( stderr, "Could not join thread (%d)\n",rc);
-    }
-    free(x);
-
-  }*/
-
 return 0;
-
 }
 
 int main(int argc,char *argv[])
@@ -404,7 +256,6 @@ int main(int argc,char *argv[])
 
   max1=(int)atoi(argv[1]);
   max2=(int)atoi(argv[2]);
-
 
   int pro1=max1*max2;
 
@@ -424,28 +275,19 @@ int main(int argc,char *argv[])
     return EXIT_FAILURE;
   }
 }
-
-
-
-
   struct parameters *p1;
   p1=malloc(sizeof(struct parameters)*1);
-
-  //int **b;
-
-  //pthread_t thread;
+  
   pthread_t parent_tid=pthread_self();
-
-
-
-  p1->b=(int**)malloc(sizeof (int *) * max1);//**********Dynamically allocating memory to the array for storing moves*************
+  
+  p1->b=(int**)malloc(sizeof (int *) * max1);//**Dynamically allocating memory to the array for storing moves**
   p1->b[0]=(int *)malloc(sizeof (int ) * max2*max1);
 
   for(int i=0;i<max1;i++){
     p1->b[i]=(p1->b[0]+max2*i);
   }
 
-  dead_end_boards=(int ***)malloc(sizeof(int **)*900);
+  dead_end_boards=(int ***)malloc(sizeof(int **)*900);//**Dynamically allocating memory for dead boards**
   if(dead_end_boards==0)
   {
     printf("Not enough memory space");
@@ -462,17 +304,13 @@ int main(int argc,char *argv[])
   }
   printf("THREAD %u: Solving the knight's tour problem for a %dx%d board\n",(unsigned int)pthread_self(),max1,max2);
 
-
   p1->m=0;
   p1->n=0;
   p1->max1=max1;
   p1->max2=max2;
-  //p1->b=b;
 
   move(p1);
-
-
-
+  
   if(pthread_equal(parent_tid,pthread_self()))
   {
     int pro=max1*max2;
@@ -485,7 +323,6 @@ if(argc==4){
   int ar[dead_ends];
   int z=0;
 
-
   for(int g=0;g<dead_ends;g++){
     for(int m=0;m<max1;m++){
       for(int n=0;n<max2;n++){
@@ -494,12 +331,11 @@ if(argc==4){
 
           z++;
         }
-    }
+      }
     }
     ar[g]=z;
-    //printf("The value of ar[g] is : %d\n",ar[g]);
     z=0;
-}
+  }
   for(int g=dead_ends-1;g>=0;g--){
     if(ar[g]>=max3){
       for(int m=0;m<max1;m++){
@@ -524,10 +360,6 @@ if(argc==4){
         fflush(stdout);
       }
     }
-    /*else{
-      g++;
-    }*/
-
   }
   fflush(stdout);
 }
@@ -537,7 +369,6 @@ else{
         if(m==0)
         {
           printf("THREAD %u: > ",(unsigned int)pthread_self());
-
         }
         else{
         printf("THREAD %u:   ",(unsigned int)pthread_self());
@@ -554,19 +385,9 @@ else{
         printf("\n");
         fflush(stdout);
       }
-
-    /*else{
-      g++;
-    }*/
-
   }
   fflush(stdout);
-
 }
-
-
-
-
   free(p1);
   free(dead_end_boards);
   return EXIT_SUCCESS;
