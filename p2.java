@@ -81,7 +81,7 @@ class Project2 {
 
 			}
 			int size=list.size();
-			//System.out.println("the first object is"+list.get(size-1).getPid());
+			
 			br.close();
 			Paging page=new Paging();
 			String[] new1_ar=page.get_memory();
